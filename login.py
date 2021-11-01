@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import bcrypt
+
 from exceptions import DataBaseError, LoginError, ExceptionCodes
 from data_manager import Session
 
@@ -19,9 +21,11 @@ class LoginHandler:
         db = DATABASE
         error_code = None
 
+        # E-mail vazio
         if not user_email:
             error_code = ExceptionCodes.LoginError.NO_USER
 
+        # Senha vazia
         elif not password_text:
             error_code = ExceptionCodes.LoginError.NO_PASSWORD
 
@@ -30,7 +34,9 @@ class LoginHandler:
 
         try:
             passwords = db.get_user_passwords(user_email)
+            password_hash, password_biometry = passwords
 
+        # Login Inexistente
         except DataBaseError as exc:
             error_code = exc.args[0]
 
@@ -39,23 +45,20 @@ class LoginHandler:
             else:
                 error_code = ExceptionCodes.UNDEFINED_ERROR
 
-            raise LoginError(error_code)
+            raise LoginError(error_code, "Usuario ou senha invalida")
 
-        if not user_email:
-            error_code = ExceptionCodes.LoginError.NO_USER
+        # Senha Invalida
+        if not bcrypt.checkpw((user_email + password_text).encode("UTF-8"),
+                              bytes.fromhex(password_hash)):
 
-        elif not password_text:
-            error_code = ExceptionCodes.LoginError.NO_PASSWORD
-
-        elif password_text != passwords[0]:
             error_code = ExceptionCodes.LoginError.INVALID_USER_OR_PASSWORD
 
         if error_code:
-            raise LoginError(error_code)
+            raise LoginError(error_code, "Usuario ou senha invalido")
 
         self._session = self._create_session(user_email)
         self._valid_login = True
-        self._fingerprint = passwords[1]
+        self._fingerprint = password_biometry
 
     def validate_fingerprint(self, fingerprint) -> bool:
         """

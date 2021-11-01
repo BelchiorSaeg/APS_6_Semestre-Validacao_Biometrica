@@ -16,15 +16,7 @@ _PRODUTORES_RURAIS_PATH = "data\\produtores_rurais\\cnpomapa30092019.csv"
 class DataBase:
 
     def __init__(self) -> None:
-
-        try:
-            with open(_DATABASE_PATH):
-                pass
-
-            self._start_connection()
-
-        except FileNotFoundError:
-            self._create_database()
+        pass
 
     def _create_database(self) -> None:
 
@@ -42,21 +34,45 @@ class DataBase:
         cursor.execute(insertion_code)
         connection.commit()
         cursor.close()
+        connection.close()
 
-        self.connection = connection
+    def connect(self) -> None:
+        """
+        |> Inicia a conexao com banco de dados.
+        |> conexao atribuida a propriedade 'self.connection'
+        """
+        try:
+            with open(_DATABASE_PATH):
+                pass
 
-    def _start_connection(self) -> None:
-        self.connection = sqlite3.connect(_DATABASE_PATH)
+        except FileNotFoundError:
+            self._create_database()
 
-    def get_user_passwords(self, email: str) -> str:
+        self._connection = sqlite3.connect(_DATABASE_PATH)
+
+    def close(self) -> None:
+        """
+        | > Fecha a conexao com o banco de dados.
+        """
+        self.connection.close()
+
+    def get_user_passwords(self, email: str) -> list:
+        """
+        | Returno
+        | -------
+        | type: list
+        |
+        | > (password_hash, password_biometry)
+        |
+        """
         querry = f"""
-SELECT PASSWORD_TEXT, PASSWORD_BIOMETRY FROM USERS U
+SELECT PASSWORD_HASH, PASSWORD_BIOMETRY FROM USERS U
 WHERE U.EMAIL = '{email}'
 """
         cursor = self.connection.cursor()
 
         try:
-            password = list(cursor.execute(querry))[0]
+            passwords = list(cursor.execute(querry))[0]
 
         except IndexError:
             error_code = ExceptionCodes.DataBaseError.NO_DATA_FOUND
@@ -66,7 +82,7 @@ WHERE U.EMAIL = '{email}'
         finally:
             cursor.close()
 
-        return password
+        return passwords
 
     def get_user_data(self, email: str) -> str:
         querry = f"""
@@ -86,6 +102,28 @@ WHERE U.EMAIL = '{email}'
             cursor.close()
 
         return user_data
+
+    @property
+    def connection(self):
+        error_code = None
+
+        try:
+            cursor = self._connection.cursor()
+            cursor.close()
+
+        except AttributeError:
+            error_code = ExceptionCodes.DataBaseError.DATABASE_NOT_CONNECTED
+
+        except sqlite3.ProgrammingError as exc:
+            if exc.args[0] != "Cannot operate on a closed database.":
+                raise sqlite3.ProgrammingError(*exc.args)
+
+            error_code = ExceptionCodes.DataBaseError.DATABASE_NOT_CONNECTED
+
+        if error_code:
+            raise DataBaseError(error_code)
+
+        return self._connection
 
     @property
     def agrotoxicos(self):

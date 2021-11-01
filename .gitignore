@@ -152,4 +152,6 @@ $RECYCLE.BIN/
 
 testes.py
 data/user_data/database.db
+data/user_data/database.db.old
+data/user_data/database_insertion_code.sql.old
 *.csv
