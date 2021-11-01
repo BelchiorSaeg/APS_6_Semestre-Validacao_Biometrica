@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import sqlite3
+import bcrypt
 import pandas as pd
 from exceptions import DataBaseError, ExceptionCodes
 
@@ -103,6 +104,25 @@ WHERE U.EMAIL = '{email}'
 
         return user_data
 
+    def register_user(self, full_name: str, email: str, password_text: str,
+                      password_biometry, permission_level: int):
+
+        password = (email + password_text).encode()
+        password_hash = bcrypt.hashpw(password, bcrypt.gensalt()).hex()
+
+        querry = f"""
+INSERT INTO USERS (FULL_NAME, EMAIL, PASSWORD_HASH, PASSWORD_BIOMETRY,
+                   PERMISSION_LEVEL) VALUES
+
+    ('{full_name}', '{email}', '{password_hash}', {password_biometry},
+     {permission_level})
+"""
+
+        cursor = self.connection.cursor()
+        cursor.execute(querry)
+        self.connection.commit()
+        cursor.close()
+
     @property
     def connection(self):
         error_code = None
@@ -155,3 +175,18 @@ class Session:
         self.email = email
         self.permission_level = permission_level
         self.active = False
+
+
+class User:
+
+    def __init__(self, full_name: str, email: str, password_text: str,
+                 password_biometry, permission_level: int):
+
+        password = (email + password_text).encode()
+        password_hash = bcrypt.hashpw(password, bcrypt.gensalt())
+
+        self.full_name = full_name
+        self.email = email
+        self.password_hash = password_hash
+        self.password_biometry = password_biometry
+        self.permission_level = permission_level

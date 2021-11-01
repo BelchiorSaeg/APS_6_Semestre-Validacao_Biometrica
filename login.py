@@ -48,7 +48,7 @@ class LoginHandler:
             raise LoginError(error_code, "Usuario ou senha invalida")
 
         # Senha Invalida
-        if not bcrypt.checkpw((user_email + password_text).encode("UTF-8"),
+        if not bcrypt.checkpw((user_email + password_text).encode(),
                               bytes.fromhex(password_hash)):
 
             error_code = ExceptionCodes.LoginError.INVALID_USER_OR_PASSWORD
