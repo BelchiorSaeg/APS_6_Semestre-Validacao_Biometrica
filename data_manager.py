@@ -5,9 +5,10 @@ import bcrypt
 import pandas as pd
 from exceptions import DataBaseError, ExceptionCodes
 
+
 _DATABASE_PATH = "data\\user_data\\database.db"
 _CREATION_CODE_PATH = "data\\user_data\\database_creation_code.sql"
-_INSERTION_CODE_PATH = "data\\user_data\\database_insertion_code.sql"
+_USER_DATA_PATH = "data\\user_data\\user_data.txt"
 _AGROTOXICOS_PATH = "data\\agrotoxicos\\agrofitprodutosformulados.csv"
 _INFORMACOES_FISCAIS_PATH = "data\\informacoes_fiscais\\mapa_despesas.csv"
 _INFORMACOES_FISCAIS_2_PATH = "data\\informacoes_fiscais\\mapa_receitas.csv"
@@ -16,26 +17,31 @@ _PRODUTORES_RURAIS_PATH = "data\\produtores_rurais\\cnpomapa30092019.csv"
 
 class DataBase:
 
-    def __init__(self) -> None:
-        pass
-
     def _create_database(self) -> None:
 
         with open(_CREATION_CODE_PATH, encoding="UTF-8") as file:
             creation_code = file.read()
 
-        with open(_INSERTION_CODE_PATH, encoding="UTF-8") as file:
-            insertion_code = file.read()
+        with open(_USER_DATA_PATH, encoding="UTF-8") as file:
+            user_data = file.read().splitlines()
+            user_data = [line.split(', ') for line in user_data]
 
         connection = sqlite3.connect(_DATABASE_PATH)
 
         cursor = connection.cursor()
 
         cursor.execute(creation_code)
-        cursor.execute(insertion_code)
         connection.commit()
         cursor.close()
         connection.close()
+
+        self.connect()
+
+        for data in user_data:
+            self.register_user(data[1], data[2], data[3], data[4],
+                               int(data[5]))
+
+        self.close()
 
     def connect(self) -> None:
         """
@@ -175,18 +181,3 @@ class Session:
         self.email = email
         self.permission_level = permission_level
         self.active = False
-
-
-class User:
-
-    def __init__(self, full_name: str, email: str, password_text: str,
-                 password_biometry, permission_level: int):
-
-        password = (email + password_text).encode()
-        password_hash = bcrypt.hashpw(password, bcrypt.gensalt())
-
-        self.full_name = full_name
-        self.email = email
-        self.password_hash = password_hash
-        self.password_biometry = password_biometry
-        self.permission_level = permission_level
