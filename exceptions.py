@@ -31,3 +31,4 @@ class ExceptionCodes:
         """
 
         NO_DATA_FOUND = "1.2.0"
+        DATABASE_NOT_CONNECTED = "1.2.1"

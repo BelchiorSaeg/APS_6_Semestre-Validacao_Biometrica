@@ -8,6 +8,7 @@ class System:
 
     def __init__(self) -> None:
         self._database = DataBase()
+        self._database.connect()
 
         login.DATABASE = self.database
 
