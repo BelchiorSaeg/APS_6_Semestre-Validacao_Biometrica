@@ -7,14 +7,20 @@ import login
 class System:
 
     def __init__(self) -> None:
+        self.start()
+
+    @property
+    def database(self):
+        return self._database
+
+    def start(self):
         self._database = DataBase()
         self._database.connect()
 
         login.DATABASE = self.database
 
-    @property
-    def database(self):
-        return self._database
+    def finish(self):
+        self._database.close()
 
 
 if __name__ == "__main__":
