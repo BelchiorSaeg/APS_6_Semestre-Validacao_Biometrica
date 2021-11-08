@@ -26,6 +26,10 @@ class DataBase:
             user_data = file.read().splitlines()
             user_data = [line.split(', ') for line in user_data]
 
+        # reseta o arquivo caso exista.
+        with open(_DATABASE_PATH, 'w', encoding="UTF-8") as file:
+            pass
+
         connection = sqlite3.connect(_DATABASE_PATH)
 
         cursor = connection.cursor()
