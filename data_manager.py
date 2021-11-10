@@ -17,6 +17,9 @@ _PRODUTORES_RURAIS_PATH = "data\\produtores_rurais\\cnpomapa30092019.csv"
 
 class DataBase:
 
+    def __init__(self) -> None:
+        self._connection = None
+
     def _create_database(self) -> None:
 
         with open(_CREATION_CODE_PATH, encoding="UTF-8") as file:
@@ -40,8 +43,8 @@ class DataBase:
         connection.close()
 
         self.connect()
-
         for data in user_data:
+            print('user ', data[0], '...', sep="")
             self.register_user(data[1], data[2], data[3], data[4],
                                int(data[5]))
 
@@ -76,60 +79,83 @@ class DataBase:
         | > (password_hash, password_biometry)
         |
         """
-        querry = f"""
-SELECT PASSWORD_HASH, PASSWORD_BIOMETRY FROM USERS U
-WHERE U.EMAIL = '{email}'
-"""
+        querry = """
+            SELECT
+                PASSWORD_HASH, PASSWORD_BIOMETRY
+            FROM
+                USERS U
+            WHERE
+                U.EMAIL = ?"""
+
         cursor = self.connection.cursor()
+        error_code = None
 
         try:
-            passwords = list(cursor.execute(querry))[0]
+            cursor.execute(querry, (email, ))
+            passwords = cursor.fetchone()
 
         except IndexError:
             error_code = ExceptionCodes.DataBaseError.NO_DATA_FOUND
 
-            raise DataBaseError(error_code, "No data Found")
-
         finally:
             cursor.close()
+
+        if error_code is not None:
+            raise DataBaseError(error_code)
 
         return passwords
 
     def get_user_data(self, email: str) -> str:
-        querry = f"""
-SELECT ID, FULL_NAME, EMAIL, PERMISSION_LEVEL FROM USERS U
-WHERE U.EMAIL = '{email}'
-"""
+        error_code = None
+
+        querry = """
+            SELECT
+                ID, FULL_NAME, EMAIL, PERMISSION_LEVEL
+            FROM
+                USERS U
+            WHERE
+                U.EMAIL = ?"""
+
         cursor = self.connection.cursor()
 
         try:
-            user_data = list(cursor.execute(querry))[0]
+            cursor.execute(querry, (email, ))
+            user_data = cursor.fetchone()
+
         except IndexError:
             error_code = ExceptionCodes.DataBaseError.NO_DATA_FOUND
 
-            raise DataBaseError(error_code, "No data Found")
+        else:
+            if user_data is None:
+                error_code = ExceptionCodes.DataBaseError.NO_DATA_FOUND
 
         finally:
             cursor.close()
 
+        if error_code is not None:
+            raise DataBaseError(error_code)
+
         return user_data
 
     def register_user(self, full_name: str, email: str, password_text: str,
-                      password_biometry, permission_level: int):
+                      password_biometry, permission_level: int) -> None:
 
         password = (email + password_text).encode()
         password_hash = bcrypt.hashpw(password, bcrypt.gensalt()).hex()
 
-        querry = f"""
-INSERT INTO USERS (FULL_NAME, EMAIL, PASSWORD_HASH, PASSWORD_BIOMETRY,
-                   PERMISSION_LEVEL) VALUES
-
-    ('{full_name}', '{email}', '{password_hash}', {password_biometry},
-     {permission_level})
+        querry = """
+            INSERT INTO
+                USERS (FULL_NAME, EMAIL, PASSWORD_HASH, PASSWORD_BIOMETRY,
+                       PERMISSION_LEVEL)
+            VALUES
+                (?, ?, ?, ?, ?)
 """
 
         cursor = self.connection.cursor()
-        cursor.execute(querry)
+
+        cursor.execute(querry, (full_name, email, password_hash,
+                                password_biometry, permission_level))
+
         self.connection.commit()
         cursor.close()
 
