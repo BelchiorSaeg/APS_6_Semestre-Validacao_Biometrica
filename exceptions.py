@@ -41,6 +41,9 @@ class ExceptionCodes:
         # Tentativa de validar a digital sem logar o usuario com a senha
         LOGIN_NOT_VALIDATE = "1.1.4"
 
+        # Tentativa de validacao de usuario sem digital cadastrada
+        UNREGISTED_FINGERPRINT = "1.1.5"
+
     class DataBaseError:
         """
         | Erros lancados pela classe DataBaseError.

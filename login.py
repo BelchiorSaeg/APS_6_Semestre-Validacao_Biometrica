@@ -61,14 +61,21 @@ class LoginHandler:
         self._valid_login = True
         self._fingerprint = password_biometry
 
-    def validate_fingerprint(self, fingerprint) -> None:
+    def validate_fingerprint(self, fingerprint,
+                             force_validation: bool = False) -> None:
         """
         EM CONSTRUÇÃO!!!!!!!
         """
-        error_code = None
+        if force_validation:
+            self._session.active = True
+            return
 
         if not self._valid_login:
             error_code = ExceptionCodes.LoginError.LOGIN_NOT_VALIDATE
+            raise LoginError(error_code)
+
+        if self._fingerprint is None:
+            error_code = ExceptionCodes.LoginError.UNREGISTERED_FINGERPRINT
             raise LoginError(error_code)
 
         fingerprint = Fingerprint.process_image(fingerprint)
