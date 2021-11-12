@@ -3,6 +3,7 @@
 import sqlite3
 import bcrypt
 import pandas as pd
+from numpay import ndarray
 from exceptions import DataBaseError, ExceptionCodes
 
 
@@ -162,8 +163,10 @@ class DataBase:
 
         return user_data
 
-    def register_user(self, full_name: str, email: str, password_text: str,
-                      password_biometry: nd, permission_level: int) -> None:
+    def register_user(self, full_name: str, email: str,
+                      password_text: str,
+                      password_biometry: ndarray,
+                      permission_level: int) -> None:
 
         password = (email + password_text).encode()
         password_hash = bcrypt.hashpw(password, bcrypt.gensalt()).hex()
