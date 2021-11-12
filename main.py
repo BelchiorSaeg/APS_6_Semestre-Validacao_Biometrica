@@ -10,7 +10,7 @@ class System:
         self.start()
 
     @property
-    def database(self):
+    def database(self) -> DataBase:
         return self._database
 
     def start(self):

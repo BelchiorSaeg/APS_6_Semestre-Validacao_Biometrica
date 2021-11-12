@@ -163,7 +163,7 @@ class DataBase:
         return user_data
 
     def register_user(self, full_name: str, email: str, password_text: str,
-                      password_biometry, permission_level: int) -> None:
+                      password_biometry: nd, permission_level: int) -> None:
 
         password = (email + password_text).encode()
         password_hash = bcrypt.hashpw(password, bcrypt.gensalt()).hex()
@@ -208,26 +208,26 @@ class DataBase:
         self.connection.commit()
 
     @property
-    def connection(self):
+    def connection(self) -> sqlite3.Connection:
         self._validate_database()
 
         return self._connection
 
     @property
-    def agrotoxicos(self):
+    def agrotoxicos(self) -> pd.DataFrame:
         df = pd.read_csv(_AGROTOXICOS_PATH, sep=";")
 
         return df
 
     @property
-    def informacoes_fiscais(self):
+    def informacoes_fiscais(self) -> pd.DataFrame:
         df_1 = pd.read_csv(_INFORMACOES_FISCAIS_PATH, sep=";")
         df_2 = pd.read_csv(_INFORMACOES_FISCAIS_2_PATH, sep=";")
 
         return df_1, df_2
 
     @property
-    def produtores_rurais(self):
+    def produtores_rurais(self) -> pd.DataFrame:
         df = pd.read_csv(_PRODUTORES_RURAIS_PATH, sep=";")
 
         return df

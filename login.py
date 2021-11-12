@@ -5,6 +5,7 @@ import bcrypt
 from exceptions import DataBaseError, LoginError, ExceptionCodes
 from data_manager import Session
 from fingerprint_processing import Fingerprint
+from numpy import ndarray
 
 DATABASE = None
 
@@ -61,7 +62,7 @@ class LoginHandler:
         self._valid_login = True
         self._fingerprint = password_biometry
 
-    def validate_fingerprint(self, fingerprint,
+    def validate_fingerprint(self, fingerprint: ndarray,
                              force_validation: bool = False) -> None:
         """
         EM CONSTRUÇÃO!!!!!!!
@@ -89,11 +90,11 @@ class LoginHandler:
         self._session.active = True
 
     @property
-    def session(self):
+    def session(self) -> Session:
         return self._session
 
     @staticmethod
-    def _create_session(user_email: str):
+    def _create_session(user_email: str) -> Session:
         args = DATABASE.get_user_data(user_email)
 
         return Session(*args)

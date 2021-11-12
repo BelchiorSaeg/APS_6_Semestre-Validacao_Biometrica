@@ -6,7 +6,9 @@ import cv2 as cv
 class Fingerprint:
 
     @staticmethod
-    def match_level(img_1, img_2):
+    def match_level(img_1: cv.numpy.ndarray,
+                    img_2: cv.numpy.ndarray) -> float:
+
         sift = cv.SIFT_create()
 
         keypoints_1, descriptors_1 = sift.detectAndCompute(img_1, None)
@@ -34,7 +36,7 @@ class Fingerprint:
         return len(match_points) / keypoints
 
     @staticmethod
-    def process_image(img):
+    def process_image(img: cv.numpy.ndarray) -> cv.numpy.ndarray:
         return img
 
     @staticmethod
@@ -42,7 +44,7 @@ class Fingerprint:
         pass
 
     @staticmethod
-    def hard_compare(img, targets: list) -> list:
+    def hard_compare(img: cv.numpy.ndarray, targets: list) -> list:
         match = []
 
         for target_img in targets:
