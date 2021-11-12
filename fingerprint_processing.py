@@ -43,7 +43,7 @@ class Fingerprint:
         return len(match_points) / keypoints
 
     @staticmethod
-    def process_image(img: cv.numpy.ndarray) -> cv.numpy.ndarray:
+    def process_image(img: bytes) -> bytes:
         return img
 
     @staticmethod
