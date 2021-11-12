@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block page_title %}{{ page_title }}{% endblock %}
+{% block header_title %}{{ header_title }}{% endblock %}
+{% block content %}
+<section>
+    <ul class="item-description">
+        {% for item_key in item.keys() %}
+            {% if item_key != "id" %}
+            <li><b>{{ item_key }}:</b> {{ item[item_key] }}</li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+</section>
+{% endblock %}
