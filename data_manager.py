@@ -43,6 +43,7 @@ class DataBase:
         connection.close()
 
         self.connect()
+
         for data in user_data:
             print('user ', data[0], '...', sep="")
             self.register_user(data[1], data[2], data[3], data[4],
@@ -55,6 +56,22 @@ class DataBase:
 
         if self._connection is None:
             error_code = ExceptionCodes.DataBaseError.DATABASE_NOT_CONNECTED
+
+        try:
+            cursor = self._connection.cursor()
+            cursor.close()
+
+        except AttributeError:
+            error_code = ExceptionCodes.DataBaseError.DATABASE_NOT_CONNECTED
+
+        except sqlite3.ProgrammingError as exc:
+            if exc.args[0] != "Cannot operate on a closed database.":
+                raise sqlite3.ProgrammingError(*exc.args)
+
+            error_code = ExceptionCodes.DataBaseError.DATABASE_NOT_CONNECTED
+
+        if error_code:
+            raise DataBaseError(error_code)
 
         if error_code is not None:
             raise DataBaseError(error_code)
@@ -117,28 +134,16 @@ class DataBase:
                 USERS U
             WHERE
                 U.EMAIL = ?"""
+        self._validate_data(email)
 
         cursor = self.connection.cursor()
-        error_code = None
-
-        try:
-            cursor.execute(querry, (email, ))
-            passwords = cursor.fetchone()
-
-        except IndexError:
-            error_code = ExceptionCodes.DataBaseError.NO_DATA_FOUND
-
-        finally:
-            cursor.close()
-
-        if error_code is not None:
-            raise DataBaseError(error_code)
+        cursor.execute(querry, (email, ))
+        passwords = cursor.fetchone()
+        cursor.close()
 
         return passwords
 
     def get_user_data(self, email: str) -> str:
-        error_code = None
-
         querry = """
             SELECT
                 ID, FULL_NAME, EMAIL, PERMISSION_LEVEL
@@ -147,24 +152,13 @@ class DataBase:
             WHERE
                 U.EMAIL = ?"""
 
+        self._validate_data(email)
+
         cursor = self.connection.cursor()
 
-        try:
-            cursor.execute(querry, (email, ))
-            user_data = cursor.fetchone()
-
-        except IndexError:
-            error_code = ExceptionCodes.DataBaseError.NO_DATA_FOUND
-
-        else:
-            if user_data is None:
-                error_code = ExceptionCodes.DataBaseError.NO_DATA_FOUND
-
-        finally:
-            cursor.close()
-
-        if error_code is not None:
-            raise DataBaseError(error_code)
+        cursor.execute(querry, (email, ))
+        user_data = cursor.fetchone()
+        cursor.close()
 
         return user_data
 
@@ -182,6 +176,9 @@ class DataBase:
                 (?, ?, ?, ?, ?)
 """
 
+        if password_biometry is None:
+            password_biometry = 'NULL'
+
         cursor = self.connection.cursor()
 
         cursor.execute(querry, (full_name, email, password_hash,
@@ -190,7 +187,8 @@ class DataBase:
         self.connection.commit()
         cursor.close()
 
-    def register_user_fingerprint(self, user_email, fingerprint_path) -> None:
+    def register_user_fingerprint(self, user_email: str,
+                                  fingerprint_path: str) -> None:
         querry = """
             UPDATE
                 USERS
@@ -211,23 +209,7 @@ class DataBase:
 
     @property
     def connection(self):
-        error_code = None
-
-        try:
-            cursor = self._connection.cursor()
-            cursor.close()
-
-        except AttributeError:
-            error_code = ExceptionCodes.DataBaseError.DATABASE_NOT_CONNECTED
-
-        except sqlite3.ProgrammingError as exc:
-            if exc.args[0] != "Cannot operate on a closed database.":
-                raise sqlite3.ProgrammingError(*exc.args)
-
-            error_code = ExceptionCodes.DataBaseError.DATABASE_NOT_CONNECTED
-
-        if error_code:
-            raise DataBaseError(error_code)
+        self._validate_database()
 
         return self._connection
 
