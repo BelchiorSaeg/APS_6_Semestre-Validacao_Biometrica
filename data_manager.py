@@ -3,7 +3,6 @@
 import sqlite3
 import bcrypt
 import pandas as pd
-from numpay import ndarray
 from exceptions import DataBaseError, ExceptionCodes
 
 
@@ -165,7 +164,7 @@ class DataBase:
 
     def register_user(self, full_name: str, email: str,
                       password_text: str,
-                      password_biometry: ndarray,
+                      password_biometry: bytes,
                       permission_level: int) -> None:
 
         password = (email + password_text).encode()
@@ -191,7 +190,7 @@ class DataBase:
         cursor.close()
 
     def register_user_fingerprint(self, user_email: str,
-                                  fingerprint_path: str) -> None:
+                                  fingerprint: bytes) -> None:
         querry = """
             UPDATE
                 USERS
@@ -202,11 +201,8 @@ class DataBase:
         """
         self._validate_data(user_email)
 
-        with open(fingerprint_path, 'rb') as file:
-            binary_file = file.read()
-
         cursor = self._connection.cursor()
-        cursor.execute(querry, (binary_file, user_email))
+        cursor.execute(querry, (fingerprint, user_email))
         cursor.close()
         self.connection.commit()
 

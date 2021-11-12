@@ -62,7 +62,7 @@ class LoginHandler:
         self._valid_login = True
         self._fingerprint = password_biometry
 
-    def validate_fingerprint(self, fingerprint: ndarray,
+    def validate_fingerprint(self, fingerprint: bytes,
                              force_validation: bool = False) -> None:
         """
         EM CONSTRUÇÃO!!!!!!!

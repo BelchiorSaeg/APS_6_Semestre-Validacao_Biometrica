@@ -1,13 +1,20 @@
 # -*- coding: utf-8 -*-
 
 import cv2 as cv
+import os
+from numpy import ndarray
+
+_TEMP_FILENAME = ".#TEMP_FILE.png"
 
 
 class Fingerprint:
 
     @staticmethod
-    def match_level(img_1: cv.numpy.ndarray,
-                    img_2: cv.numpy.ndarray) -> float:
+    def match_level(img_1: bytes,
+                    img_2: bytes) -> float:
+
+        img_1 = Fingerprint.bytes_to_ndarray(img_1)
+        img_2 = Fingerprint.bytes_to_ndarray(img_2)
 
         sift = cv.SIFT_create()
 
@@ -51,3 +58,25 @@ class Fingerprint:
             match.append(Fingerprint.match_level(img, target_img))
 
         return match
+
+    @staticmethod
+    def bytes_to_ndarray(bin_file: bytes) -> ndarray:
+        with open(_TEMP_FILENAME, 'wb') as file:
+            file.write(bin_file)
+
+        array = cv.imread(_TEMP_FILENAME)
+
+        os.remove(_TEMP_FILENAME)
+
+        return array
+
+    @staticmethod
+    def ndarray_to_bytes(array: ndarray) -> bytes:
+        cv.imwrite(_TEMP_FILENAME, array)
+
+        with open(_TEMP_FILENAME, 'rb') as file:
+            bin_file = file.read()
+
+        os.remove(_TEMP_FILENAME)
+
+        return bin_file

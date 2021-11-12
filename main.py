@@ -25,3 +25,5 @@ class System:
 
 if __name__ == "__main__":
     SYSTEM = System()
+    SYSTEM.start()
+    SYSTEM.finish()
