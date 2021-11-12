@@ -29,6 +29,10 @@ def login():
     elif request.method == 'POST':
         pass
 
+@app.route('/logout')
+def logout():
+    pass
+
 @app.route('/tabela')
 def tabela():
     return render_template('tabela.html', page_title='Produtos agrícolas', header_title='Produtos agrícolas', items=items, user='Edson', color='#C4F8A4', color_row_odd='#A5B5C6', color_row_even='#A9BE9C')
