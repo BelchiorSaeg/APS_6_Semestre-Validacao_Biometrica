@@ -42,7 +42,7 @@ class ExceptionCodes:
         LOGIN_NOT_VALIDATE = "1.1.4"
 
         # Tentativa de validacao de usuario sem digital cadastrada
-        UNREGISTED_FINGERPRINT = "1.1.5"
+        UNREGISTERED_FINGERPRINT = "1.1.5"
 
     class DataBaseError:
         """

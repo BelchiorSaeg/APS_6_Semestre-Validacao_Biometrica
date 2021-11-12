@@ -50,6 +50,37 @@ class DataBase:
 
         self.close()
 
+    def _validate_database(self) -> None:
+        error_code = None
+
+        if self._connection is None:
+            error_code = ExceptionCodes.DataBaseError.DATABASE_NOT_CONNECTED
+
+        if error_code is not None:
+            raise DataBaseError(error_code)
+
+    def _validate_data(self, email: str) -> None:
+        querry = """
+            SELECT
+                *
+            FROM
+                USERS
+            WHERE
+                EMAIL = ?
+        """
+        error_code = None
+
+        self._validate_database()
+
+        cursor = self.connection.cursor()
+        cursor.execute(querry, (email, ))
+
+        if cursor.fetchone() is None:
+            error_code = ExceptionCodes.DataBaseError.NO_DATA_FOUND
+
+        if error_code is not None:
+            raise DataBaseError(error_code)
+
     def connect(self) -> None:
         """
         |> Inicia a conexao com banco de dados.
@@ -158,6 +189,25 @@ class DataBase:
 
         self.connection.commit()
         cursor.close()
+
+    def register_user_fingerprint(self, user_email, fingerprint_path) -> None:
+        querry = """
+            UPDATE
+                USERS
+            SET
+                PASSWORD_BIOMETRY = ?
+            WHERE
+                EMAIL = ?
+        """
+        self._validate_data(user_email)
+
+        with open(fingerprint_path, 'rb') as file:
+            binary_file = file.read()
+
+        cursor = self._connection.cursor()
+        cursor.execute(querry, (binary_file, user_email))
+        cursor.close()
+        self.connection.commit()
 
     @property
     def connection(self):
