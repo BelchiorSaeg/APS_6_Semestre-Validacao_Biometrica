@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block page_title %}{{ page_title }}{% endblock %}
+{% block header_title %}{{ header_title }}{% endblock %}
+{% block style %}
+tbody tr:nth-child(odd) {
+    background-color: {{ color_row_odd }};
+}
+
+tbody tr:nth-child(even) {
+    background-color: {{ color_row_even }};
+}
+{% endblock %}
+{% block content %}
+<table>
+    <thead>
+        <tr>
+            {% for header_key in items[0].keys() %}
+                {% if header_key != "id" %}
+                <th>{{ header_key }}</th>
+                {% endif %}
+            {% endfor %}
+            <th>Ver mais</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in items %}
+        <tr>
+            {% for item_key in item.keys() %}
+                {% if item_key != "id" %}
+                <td>{{ item[item_key] }}</td>
+                {% endif %}
+            {% endfor %}
+            <td class="see-more">
+                {% if "id" in item.keys() %}
+                <a href="/item?id={{ item["id"] }}"><img src="/static/images/lupa.png" alt="Lupa" height="20"></a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
