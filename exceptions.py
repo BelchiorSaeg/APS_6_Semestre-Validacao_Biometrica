@@ -41,10 +41,10 @@ class ExceptionCodes:
         INVALID_FINGERPRINT_MIMETYPE = "1.1.5"
 
         # Tentativa de validar a digital sem logar o usuario com a senha
-        LOGIN_NOT_VALIDATE = "1.1.4"
+        LOGIN_NOT_VALIDATE = "1.1.6"
 
         # Tentativa de validacao de um usuario sem digital cadastrada
-        UNREGISTERED_FINGERPRINT = "1.1.5"
+        UNREGISTERED_FINGERPRINT = "1.1.7"
 
     class DataBaseError:
         """
