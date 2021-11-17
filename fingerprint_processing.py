@@ -3,12 +3,13 @@
 import cv2 as cv
 import os
 import numpy as np
-from numpy import ndarray
-
-_TEMP_FILENAME = ".#TEMP_FILE.png"
 
 
 class Fingerprint:
+    """
+    | > Processamento e validacao de digitais.
+    """
+    _TEMP_FILENAME = ".#TEMP_FILE.png"
 
     @staticmethod
     def match_level(img_1: bytes,
@@ -58,31 +59,28 @@ class Fingerprint:
                                    cv.ADAPTIVE_THRESH_GAUSSIAN_C,
                                    cv.THRESH_BINARY, 145, 1)
 
-        # img = cv.morphologyEx(img, cv.MORPH_CLOSE, kernel)
-        # img = cv.morphologyEx(img, cv.MORPH_OPEN, kernel)
-
         img = Fingerprint.ndarray_to_bytes(img)
 
         return img
 
     @staticmethod
-    def bytes_to_ndarray(bin_file: bytes) -> ndarray:
-        with open(_TEMP_FILENAME, 'wb') as file:
+    def bytes_to_ndarray(bin_file: bytes) -> np.ndarray:
+        with open(Fingerprint._TEMP_FILENAME, 'wb') as file:
             file.write(bin_file)
 
-        array = cv.imread(_TEMP_FILENAME)
+        array = cv.imread(Fingerprint._TEMP_FILENAME)
 
-        os.remove(_TEMP_FILENAME)
+        os.remove(Fingerprint._TEMP_FILENAME)
 
         return array
 
     @staticmethod
-    def ndarray_to_bytes(array: ndarray) -> bytes:
-        cv.imwrite(_TEMP_FILENAME, array)
+    def ndarray_to_bytes(array: np.ndarray) -> bytes:
+        cv.imwrite(Fingerprint._TEMP_FILENAME, array)
 
-        with open(_TEMP_FILENAME, 'rb') as file:
+        with open(Fingerprint._TEMP_FILENAME, 'rb') as file:
             bin_file = file.read()
 
-        os.remove(_TEMP_FILENAME)
+        os.remove(Fingerprint._TEMP_FILENAME)
 
         return bin_file

@@ -16,6 +16,9 @@ _PRODUTORES_RURAIS_PATH = "data\\produtores_rurais\\cnpomapa30092019.csv"
 
 
 class DataBase:
+    """
+    | > Interface do banco de dados
+    """
 
     def __init__(self) -> None:
         self._connection = None
@@ -133,7 +136,8 @@ class DataBase:
             FROM
                 USERS U
             WHERE
-                U.EMAIL = ?"""
+                U.EMAIL = ?
+        """
         self._validate_data(email)
 
         cursor = self.connection.cursor()
@@ -150,7 +154,8 @@ class DataBase:
             FROM
                 USERS U
             WHERE
-                U.EMAIL = ?"""
+                U.EMAIL = ?
+        """
 
         self._validate_data(email)
 
@@ -176,7 +181,7 @@ class DataBase:
                        PERMISSION_LEVEL)
             VALUES
                 (?, ?, ?, ?, ?)
-"""
+        """
 
         if password_biometry is None:
             password_biometry = 'NULL'
@@ -233,6 +238,10 @@ class DataBase:
 
 
 class Session:
+    """
+    | > Sessao de usuario
+    | > guarda as principais a respeito do usuario e sua sessao
+    """
 
     def __init__(self, user_id: int, full_name: str,
                  email: str, permission_level: int) -> None:

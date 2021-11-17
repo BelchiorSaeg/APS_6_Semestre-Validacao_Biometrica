@@ -5,6 +5,9 @@ import login
 
 
 class System:
+    """
+    | > Gerenciador do sistema.
+    """
     SYSTEM_IDLE = 0
     SYSTEM_STARTED = 1
     SYSTEM_FINISHED = 2
@@ -38,4 +41,11 @@ class System:
 if __name__ == "__main__":
     SYSTEM = System()
     SYSTEM.start()
+
+    user_email = 'ricardo_salles@email.gov.br'
+
+    user_data = SYSTEM.database.get_user_data(user_email)
+
+    print(user_data)
+
     SYSTEM.finish()
