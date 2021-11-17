@@ -10,7 +10,7 @@ class System:
         self.start()
 
     @property
-    def database(self):
+    def database(self) -> DataBase:
         return self._database
 
     def start(self):
@@ -25,3 +25,5 @@ class System:
 
 if __name__ == "__main__":
     SYSTEM = System()
+    SYSTEM.start()
+    SYSTEM.finish()
