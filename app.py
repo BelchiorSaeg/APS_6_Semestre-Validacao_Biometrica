@@ -1,6 +1,6 @@
 import os
 from data_manager import DataBase
-from flask import Flask, render_template, request, make_response, url_for, session, redirect
+from flask import Flask, render_template, request, make_response, session, redirect
 from werkzeug.utils import secure_filename
 from exceptions import ExceptionCodes, LoginError
 from login import LoginHandler
@@ -33,13 +33,24 @@ access_level = [
 ]
 
 class System:
+    """
+    | > Gerenciador do sistema.
+    """
+    SYSTEM_IDLE = 0
+    SYSTEM_STARTED = 1
+    SYSTEM_FINISHED = 2
 
     def __init__(self) -> None:
         self.start()
+        self._status = self.SYSTEM_IDLE
 
     @property
     def database(self) -> DataBase:
         return self._database
+
+    @property
+    def status(self) -> int:
+        return self._status
 
     def start(self):
         self._database = DataBase()
@@ -47,8 +58,12 @@ class System:
 
         login.DATABASE = self.database
 
+        self._status = self.SYSTEM_STARTED
+
     def finish(self):
         self._database.close()
+
+        self._status = self.SYSTEM_FINISHED
 
 def is_logged():
     return 'user_id' in session and 'full_name' in session and 'permission_level'
@@ -76,7 +91,7 @@ def login():
         login = LoginHandler()
         try:
             login.validate_login(request.form['username'], request.form['password'])
-            
+
             if 'biometry' not in request.files:
                 raise LoginError(ExceptionCodes.LoginError.NO_FINGERPRINT)
             fingerprint_file = request.files['biometry']
@@ -151,10 +166,12 @@ def login():
                     accept_imagefile=','.join(ALLOWED_MIMETYPES),
                     unknown_error=True,
                     username=request.form['username'])
-            
+
 
 @app.route('/logout')
 def logout():
+    SYSTEM.finish()
+
     session.pop('user_id', None)
     session.pop('full_name', None)
     session.pop('permission_level', None)
@@ -184,7 +201,5 @@ def item():
     else:
         return redirect('/login')
 
-if __name__ == "__main__":
-    SYSTEM = System()
-    SYSTEM.start()
-    SYSTEM.finish()
+SYSTEM = System()
+SYSTEM.start()
