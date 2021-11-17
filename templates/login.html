@@ -13,10 +13,39 @@
                 <div class="error">
                     <p>Você precisa preencher seu nome de usuário!</p>
                 </div>
-                {% endif %}
-                {% if error_no_password %}
+                {% elif error_no_password %}
                 <div class="error">
                     <p>Você precisa preencher sua senha!</p>
+                </div>
+                {% elif error_no_fingerprint %}
+                <div class="error">
+                    <p>Você precisa inserir sua impressão digital!</p>
+                </div>
+                {% elif error_invalid_filetype %}
+                <div class="error">
+                    <p>O tipo de arquivo da impressão digital não é suportado!</p>
+                </div>
+                {% elif error_invalid_login %}
+                <div class="error">
+                    <p>Nome de usuário ou senha inválidos!</p>
+                </div>
+                {% elif error_invalid_fingerprint %}
+                <div class="error">
+                    <p>Impressão digital inválida!</p>
+                </div>
+                {% elif error_login_not_validate %}
+                <div class="error">
+                    <p>Este usuário não possui senha cadastrada!<br>
+                       A política de segurança exige uma senha válida.</p>
+                </div>
+                {% elif error_unregistered_fingerprint %}
+                <div class="error">
+                    <p>Este usuário não possui impressão digital cadastrada!<br>
+                       A política de segurança exige uma impressão digital válida.</p>
+                </div>
+                {% elif unknown_error %}
+                <div class="error">
+                    <p>Erro desconhecido!</p>
                 </div>
                 {% endif %}
                 <input type="text" name="username" placeholder="Nome de usuário" value="{{ username }}"><br>
