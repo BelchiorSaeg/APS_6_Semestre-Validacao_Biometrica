@@ -82,7 +82,7 @@ class LoginHandler:
         fingerprint = Fingerprint.process_image(fingerprint)
         match_level = Fingerprint.match_level(self._fingerprint, fingerprint)
 
-        if match_level < 0.9:
+        if match_level < 0.005:
             error_code = ExceptionCodes.LoginError.INVALID_FINGERPRINT
             raise LoginError(error_code)
 

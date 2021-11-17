@@ -2,6 +2,7 @@
 
 import cv2 as cv
 import os
+import numpy as np
 from numpy import ndarray
 
 _TEMP_FILENAME = ".#TEMP_FILE.png"
@@ -44,20 +45,25 @@ class Fingerprint:
 
     @staticmethod
     def process_image(img: bytes) -> bytes:
+        img = Fingerprint.bytes_to_ndarray(img)
+
+        img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+        img = img[935:2636, 547:1723]
+
+        kernel = np.ones((5, 5), np.uint8)
+        img = cv.morphologyEx(img, cv.MORPH_CLOSE, kernel)
+        img = cv.morphologyEx(img, cv.MORPH_OPEN, kernel)
+
+        img = cv.adaptiveThreshold(img, 255,
+                                   cv.ADAPTIVE_THRESH_GAUSSIAN_C,
+                                   cv.THRESH_BINARY, 145, 1)
+
+        # img = cv.morphologyEx(img, cv.MORPH_CLOSE, kernel)
+        # img = cv.morphologyEx(img, cv.MORPH_OPEN, kernel)
+
+        img = Fingerprint.ndarray_to_bytes(img)
+
         return img
-
-    @staticmethod
-    def display_matches():
-        pass
-
-    @staticmethod
-    def hard_compare(img: cv.numpy.ndarray, targets: list) -> list:
-        match = []
-
-        for target_img in targets:
-            match.append(Fingerprint.match_level(img, target_img))
-
-        return match
 
     @staticmethod
     def bytes_to_ndarray(bin_file: bytes) -> ndarray:
