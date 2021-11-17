@@ -1,7 +1,6 @@
 import os
-from flask import Flask, render_template, request, make_response, url_for, session
-from werkzeug.utils import redirect, secure_filename
-from data_manager import Session
+from flask import Flask, render_template, request, make_response, url_for, session, redirect
+from werkzeug.utils import secure_filename
 from exceptions import ExceptionCodes, LoginError
 from login import LoginHandler
 app = Flask(__name__)
@@ -48,13 +47,12 @@ def index():
             color_row_odd=access_level[int(session['permission_level'])]['color_row_odd'],
             color_row_even=access_level[int(session['permission_level'])]['color_row_even'])
     else:
-        return redirect(url_for('login'))
+        return redirect('/login')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'GET':
-        if 'session' in session:
-            return render_template('login.html', accept_imagefile=','.join(ALLOWED_MIMETYPES))
+        return render_template('login.html', accept_imagefile=','.join(ALLOWED_MIMETYPES))
     elif request.method == 'POST':
         login = LoginHandler()
         try:
@@ -71,15 +69,14 @@ def login():
                 fingerprint_filename = secure_filename(fingerprint_file.filename)
                 fingerprint_file.save(os.path.join('temp', fingerprint_filename))
                 with open(os.path.join('temp', fingerprint_filename), mode='rb') as f:
-                    login.validate_fingerprint(f.read())
+                    login.validate_fingerprint(f.read(), True)
                 session['user_id'] = login.session.user_id
                 session['full_name'] = login.session.full_name
                 session['permission_level'] = login.session.permission_level
-                return redirect(url_for('index'))
+                return redirect('/index')
             else:
                 raise LoginError(ExceptionCodes.UNDEFINED_ERROR)
 
-            login.validate_fingerprint()
         except LoginError as e:
             if e.error_code == ExceptionCodes.LoginError.NO_USER:
                 return render_template(
@@ -142,7 +139,7 @@ def logout():
     session.pop('user_id', None)
     session.pop('full_name', None)
     session.pop('permission_level', None)
-    return redirect(url_for('index'))
+    return redirect('/index')
 
 @app.route('/item')
 def item():
@@ -166,4 +163,4 @@ def item():
                 user='Edson',
                 color=access_level[int(session['permission_level'])]['color']), 404)
     else:
-        return redirect(url_for('login'))
+        return redirect('/login')

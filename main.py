@@ -3,7 +3,6 @@
 from data_manager import DataBase
 import login
 
-
 class System:
 
     def __init__(self) -> None:
