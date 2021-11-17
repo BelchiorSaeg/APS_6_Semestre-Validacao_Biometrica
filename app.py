@@ -1,4 +1,5 @@
 import os
+from data_manager import DataBase
 from flask import Flask, render_template, request, make_response, url_for, session, redirect
 from werkzeug.utils import secure_filename
 from exceptions import ExceptionCodes, LoginError
@@ -30,6 +31,24 @@ access_level = [
         'color_row_even': '#EBF1E9'
     }
 ]
+
+class System:
+
+    def __init__(self) -> None:
+        self.start()
+
+    @property
+    def database(self) -> DataBase:
+        return self._database
+
+    def start(self):
+        self._database = DataBase()
+        self._database.connect()
+
+        login.DATABASE = self.database
+
+    def finish(self):
+        self._database.close()
 
 def is_logged():
     return 'user_id' in session and 'full_name' in session and 'permission_level'
@@ -164,3 +183,8 @@ def item():
                 color=access_level[int(session['permission_level'])]['color']), 404)
     else:
         return redirect('/login')
+
+if __name__ == "__main__":
+    SYSTEM = System()
+    SYSTEM.start()
+    SYSTEM.finish()
