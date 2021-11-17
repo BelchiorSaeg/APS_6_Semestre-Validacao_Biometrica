@@ -36,3 +36,15 @@ input {
 input[type="text"], input[type="password"] {
     width: calc(100% - 30px);
 }
+
+.error {
+    padding: 5px 10px;
+    border: 1px solid #f80808;
+    background-color: #ff8080;
+    border-radius: 3px;
+}
+
+.error p {
+    margin: 0;
+    font-size: 0.75em;
+}

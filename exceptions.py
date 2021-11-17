@@ -37,6 +37,8 @@ class ExceptionCodes:
         NO_USER = "1.1.1"
         INVALID_USER_OR_PASSWORD = "1.1.2"
         INVALID_FINGERPRINT = "1.1.3"
+        NO_FINGERPRINT = "1.1.4"
+        INVALID_FINGERPRINT_MIMETYPE = "1.1.5"
 
         # Tentativa de validar a digital sem logar o usuario com a senha
         LOGIN_NOT_VALIDATE = "1.1.4"
