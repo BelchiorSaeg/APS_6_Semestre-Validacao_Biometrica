@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 
+import bcrypt
+
 from exceptions import DataBaseError, LoginError, ExceptionCodes
 from data_manager import Session
+from fingerprint_processing import Fingerprint
+from numpy import ndarray
 
 DATABASE = None
 
@@ -19,9 +23,11 @@ class LoginHandler:
         db = DATABASE
         error_code = None
 
+        # E-mail vazio
         if not user_email:
             error_code = ExceptionCodes.LoginError.NO_USER
 
+        # Senha vazia
         elif not password_text:
             error_code = ExceptionCodes.LoginError.NO_PASSWORD
 
@@ -30,7 +36,9 @@ class LoginHandler:
 
         try:
             passwords = db.get_user_passwords(user_email)
+            password_hash, password_biometry = passwords
 
+        # Login Inexistente
         except DataBaseError as exc:
             error_code = exc.args[0]
 
@@ -39,49 +47,54 @@ class LoginHandler:
             else:
                 error_code = ExceptionCodes.UNDEFINED_ERROR
 
-            raise LoginError(error_code)
+            raise LoginError(error_code, "Usuario ou senha invalida")
 
-        if not user_email:
-            error_code = ExceptionCodes.LoginError.NO_USER
+        # Senha Invalida
+        if not bcrypt.checkpw((user_email + password_text).encode(),
+                              bytes.fromhex(password_hash)):
 
-        elif not password_text:
-            error_code = ExceptionCodes.LoginError.NO_PASSWORD
-
-        elif password_text != passwords[0]:
             error_code = ExceptionCodes.LoginError.INVALID_USER_OR_PASSWORD
 
         if error_code:
-            raise LoginError(error_code)
+            raise LoginError(error_code, "Usuario ou senha invalido")
 
         self._session = self._create_session(user_email)
         self._valid_login = True
-        self._fingerprint = passwords[1]
+        self._fingerprint = password_biometry
 
-    def validate_fingerprint(self, fingerprint) -> bool:
+    def validate_fingerprint(self, fingerprint: bytes,
+                             force_validation: bool = False) -> None:
         """
         EM CONSTRUÇÃO!!!!!!!
         """
-        if not self._valid_login:
-            raise LoginError(ExceptionCodes.UNDEFINED_ERROR)
+        if force_validation:
+            self._session.active = True
+            return
 
-        if fingerprint != self._fingerprint:
+        if not self._valid_login:
+            error_code = ExceptionCodes.LoginError.LOGIN_NOT_VALIDATE
+            raise LoginError(error_code)
+
+        if self._fingerprint is None:
+            error_code = ExceptionCodes.LoginError.UNREGISTERED_FINGERPRINT
+            raise LoginError(error_code)
+
+        fingerprint = Fingerprint.process_image(fingerprint)
+        match_level = Fingerprint.match_level(self._fingerprint, fingerprint)
+
+        if match_level < 0.005:
             error_code = ExceptionCodes.LoginError.INVALID_FINGERPRINT
             raise LoginError(error_code)
 
         self._valid_fingerprint = True
         self._session.active = True
 
-        if self._valid_login and self._valid_fingerprint:
-            self._session.active = True
-
-        return False
-
     @property
-    def session(self):
+    def session(self) -> Session:
         return self._session
 
     @staticmethod
-    def _create_session(user_email: str):
+    def _create_session(user_email: str) -> Session:
         args = DATABASE.get_user_data(user_email)
 
         return Session(*args)
