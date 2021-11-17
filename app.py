@@ -69,7 +69,7 @@ def login():
                 fingerprint_filename = secure_filename(fingerprint_file.filename)
                 fingerprint_file.save(os.path.join('temp', fingerprint_filename))
                 with open(os.path.join('temp', fingerprint_filename), mode='rb') as f:
-                    login.validate_fingerprint(f.read(), True)
+                    login.validate_fingerprint(f.read())
                 session['user_id'] = login.session.user_id
                 session['full_name'] = login.session.full_name
                 session['permission_level'] = login.session.permission_level
