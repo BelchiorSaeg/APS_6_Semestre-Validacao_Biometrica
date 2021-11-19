@@ -66,7 +66,7 @@ class System:
         self._status = self.SYSTEM_FINISHED
 
 def is_logged():
-    return 'user_id' in session and 'full_name' in session and 'permission_level'
+    return 'user_id' in session and 'full_name' in session and 'permission_level' in session
 
 @app.route('/')
 def index():
