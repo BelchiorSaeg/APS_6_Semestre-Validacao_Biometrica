@@ -56,7 +56,7 @@ class System:
         self._database = DataBase()
         self._database.connect()
 
-        login.DATABASE = self.database
+        login_package.DATABASE = self.database
 
         self._status = self.SYSTEM_STARTED
 
