@@ -68,10 +68,8 @@ class System:
 def is_logged():
     return 'user_id' in session and 'full_name' in session and 'permission_level' in session
 
-items = []
-
 def carregar_dados():
-    if session['permission_level'] == 1:
+    if int(session['permission_level']) == 1:
         agrotoxicos = SYSTEM.database.agrotoxicos.head(1000)
         items = []
         last_id = 0
@@ -80,36 +78,37 @@ def carregar_dados():
                 if int(row[0]) != last_id:
                     last_id = int(row[0])
                     items.append({
-                        'id': row[0],
+                        'id': int(row[0]),
                         'Marca comercial': row[1],
                         'Formulação': row[2],
                     })
-    elif session['permission_level'] == 2:
+    elif int(session['permission_level']) == 2:
         agrotoxicos = SYSTEM.database.informacoes_fiscais.head(1000)
         items = []
         for index, row in agrotoxicos.iterrows():
             if index > 0:
                 items.append({
-                    'id': index,
+                    'id': int(index),
                     'Ano': row[0],
                     'Detalhes': row[7],
                 })
-    elif session['permission_level'] == 3:
+    elif int(session['permission_level']) == 3:
         agrotoxicos = SYSTEM.database.produtores_rurais.head(1000)
         items = []
         for index, row in agrotoxicos.iterrows():
             if index > 0:
                 items.append({
-                    'id': index,
+                    'id': int(index),
                     'Tipo de entidade': row[0],
                     'País': row[2],
                     'UF': row[3]
                 })
+    return items
 
 @app.route('/')
 def index():
     if is_logged():
-        carregar_dados()
+        items = carregar_dados()
         return render_template(
             'tabela.html',
             page_title=access_level[int(session['permission_level'])]['title'],
@@ -219,7 +218,7 @@ def logout():
 @app.route('/item')
 def item():
     if is_logged():
-        carregar_dados()
+        items = carregar_dados()
         id = int(request.args.get('id'))
         for item in items:
             if item['id'] == id:
