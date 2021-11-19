@@ -113,7 +113,8 @@ class DataBase:
         except FileNotFoundError:
             self._create_database()
 
-        self._connection = sqlite3.connect(_DATABASE_PATH)
+        self._connection = sqlite3.connect(_DATABASE_PATH,
+                                           check_same_thread=False)
 
     def close(self) -> None:
         """
