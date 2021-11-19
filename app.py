@@ -3,7 +3,7 @@ from data_manager import DataBase
 from flask import Flask, render_template, request, make_response, session, redirect
 from werkzeug.utils import secure_filename
 from exceptions import ExceptionCodes, LoginError
-from login import LoginHandler
+import login as login_package
 app = Flask(__name__)
 
 app.secret_key = '98cece9dc0a7d58b18cf8118f655ee5c9de42730c2a761cee92613c6b1b2b3cf'
@@ -127,7 +127,7 @@ def login():
     if request.method == 'GET':
         return render_template('login.html', accept_imagefile=','.join(ALLOWED_MIMETYPES))
     elif request.method == 'POST':
-        login = LoginHandler()
+        login = login_package.LoginHandler()
         try:
             login.validate_login(request.form['username'], request.form['password'])
 
