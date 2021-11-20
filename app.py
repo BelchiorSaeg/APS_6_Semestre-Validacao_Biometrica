@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 app.secret_key = '98cece9dc0a7d58b18cf8118f655ee5c9de42730c2a761cee92613c6b1b2b3cf'
 
-ALLOWED_MIMETYPES = ['image/jpeg']
+ALLOWED_MIMETYPES = ['image/jpeg', 'image/png']
 
 access_level = [
     {},
