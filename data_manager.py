@@ -13,7 +13,7 @@ _AGROTOXICOS_PATH = "data\\agrotoxicos\\agrofitprodutosformulados.csv"
 _INFORMACOES_FISCAIS_PATH = "data\\informacoes_fiscais\\mapa_despesas.csv"
 _INFORMACOES_FISCAIS_2_PATH = "data\\informacoes_fiscais\\mapa_receitas.csv"
 _PRODUTORES_RURAIS_PATH = "data\\produtores_rurais\\cnpomapa30092019.csv"
-
+_RICARDO_FINGERPRINT = "data\\user_data\\fingerprints\\finger_database.png"
 
 class DataBase:
     """
@@ -52,7 +52,11 @@ class DataBase:
             self.register_user(data[1], data[2], data[3], data[4],
                                int(data[5]))
 
-        self.close()
+        with open(_RICARDO_FINGERPRINT, 'rb') as file:
+            ricardo_fingerprint = file.read()
+
+        self.register_user_fingerprint('ricardo_salles@email.gov.br',
+                                       ricardo_fingerprint)
 
     def _validate_database(self) -> None:
         error_code = None
