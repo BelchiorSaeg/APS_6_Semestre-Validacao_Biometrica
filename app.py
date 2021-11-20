@@ -1,6 +1,6 @@
 import os
 from data_manager import DataBase
-from flask import Flask, render_template, request, make_response, session, redirect
+from flask import Flask, render_template, request, make_response, session, redirect, url_for
 from werkzeug.utils import secure_filename
 from exceptions import ExceptionCodes, LoginError
 import login as login_package
@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 app.secret_key = '98cece9dc0a7d58b18cf8118f655ee5c9de42730c2a761cee92613c6b1b2b3cf'
 
-ALLOWED_MIMETYPES = ['image/*']
+ALLOWED_MIMETYPES = ['image/jpeg']
 
 access_level = [
     {},
@@ -68,10 +68,8 @@ class System:
 def is_logged():
     return 'user_id' in session and 'full_name' in session and 'permission_level' in session
 
-items = []
-
 def carregar_dados():
-    if session['permission_level'] == 1:
+    if int(session['permission_level']) == 1:
         agrotoxicos = SYSTEM.database.agrotoxicos.head(1000)
         items = []
         last_id = 0
@@ -80,36 +78,37 @@ def carregar_dados():
                 if int(row[0]) != last_id:
                     last_id = int(row[0])
                     items.append({
-                        'id': row[0],
+                        'id': int(row[0]),
                         'Marca comercial': row[1],
                         'Formulação': row[2],
                     })
-    elif session['permission_level'] == 2:
+    elif int(session['permission_level']) == 2:
         agrotoxicos = SYSTEM.database.informacoes_fiscais.head(1000)
         items = []
         for index, row in agrotoxicos.iterrows():
             if index > 0:
                 items.append({
-                    'id': index,
+                    'id': int(index),
                     'Ano': row[0],
                     'Detalhes': row[7],
                 })
-    elif session['permission_level'] == 3:
+    elif int(session['permission_level']) == 3:
         agrotoxicos = SYSTEM.database.produtores_rurais.head(1000)
         items = []
         for index, row in agrotoxicos.iterrows():
             if index > 0:
                 items.append({
-                    'id': index,
+                    'id': int(index),
                     'Tipo de entidade': row[0],
                     'País': row[2],
                     'UF': row[3]
                 })
+    return items
 
 @app.route('/')
 def index():
     if is_logged():
-        carregar_dados()
+        items = carregar_dados()
         return render_template(
             'tabela.html',
             page_title=access_level[int(session['permission_level'])]['title'],
@@ -120,7 +119,7 @@ def index():
             color_row_odd=access_level[int(session['permission_level'])]['color_row_odd'],
             color_row_even=access_level[int(session['permission_level'])]['color_row_even'])
     else:
-        return redirect('/login')
+        return redirect(url_for('login'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -146,7 +145,7 @@ def login():
                 session['user_id'] = login.session.user_id
                 session['full_name'] = login.session.full_name
                 session['permission_level'] = login.session.permission_level
-                return redirect('/index')
+                return redirect(url_for('index'))
             else:
                 raise LoginError(ExceptionCodes.UNDEFINED_ERROR)
 
@@ -214,18 +213,18 @@ def logout():
     session.pop('user_id', None)
     session.pop('full_name', None)
     session.pop('permission_level', None)
-    return redirect('/index')
+    return redirect(url_for('index'))
 
 @app.route('/item')
 def item():
     if is_logged():
-        carregar_dados()
+        items = carregar_dados()
         id = int(request.args.get('id'))
         for item in items:
             if item['id'] == id:
                 return render_template(
                     'ver-mais.html',
-                    page_title=item['Marca'],
+                    page_title='Mais informações',
                     header_title=access_level[int(session['permission_level'])]['title'],
                     item=item,
                     user='Edson',
@@ -239,7 +238,7 @@ def item():
                 user='Edson',
                 color=access_level[int(session['permission_level'])]['color']), 404)
     else:
-        return redirect('/login')
+        return redirect(url_for('login'))
 
 SYSTEM = System()
 SYSTEM.start()
