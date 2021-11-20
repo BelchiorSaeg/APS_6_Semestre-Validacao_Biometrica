@@ -14,9 +14,9 @@ access_level = [
     {},
     {
         'title': 'Produção agrícola',
-        'color': '#C4F8A4',
-        'color_row_odd':'#A5B5C6',
-        'color_row_even': '#A9BE9C'
+        'color': '#70AD47',
+        'color_row_odd':'#D5E3CF',
+        'color_row_even': '#EBF1E9'
     },
     {
         'title': 'Informações fiscais',
@@ -26,9 +26,9 @@ access_level = [
     },
     {
         'title': 'Agrotóxicos',
-        'color': '#70AD47',
-        'color_row_odd':'#D5E3CF',
-        'color_row_even': '#EBF1E9'
+        'color': '#4472C4',
+        'color_row_odd':'#CFD5EA',
+        'color_row_even': '#E9EBF5'
     }
 ]
 
@@ -83,14 +83,25 @@ def carregar_dados():
                         'Formulação': row[2],
                     })
     elif int(session['permission_level']) == 2:
-        agrotoxicos = SYSTEM.database.informacoes_fiscais.head(1000)
+        despesas, receitas = SYSTEM.database.informacoes_fiscais
+        despesas = despesas.head(1000)
+        receitas = receitas.head(1000)
         items = []
-        for index, row in agrotoxicos.iterrows():
+        for index, row in despesas.iterrows():
             if index > 0:
                 items.append({
                     'id': int(index),
                     'Ano': row[0],
                     'Detalhes': row[7],
+                    'Tipo': 'Despesa'
+                })
+        for index, row in receitas.iterrows():
+            if index > 0:
+                items.append({
+                    'id': int(index),
+                    'Ano': row[0],
+                    'Detalhes': row[7],
+                    'Tipo': 'Receita'
                 })
     elif int(session['permission_level']) == 3:
         agrotoxicos = SYSTEM.database.produtores_rurais.head(1000)
