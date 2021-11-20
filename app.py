@@ -238,7 +238,7 @@ def item():
                     page_title='Mais informações',
                     header_title=access_level[int(session['permission_level'])]['title'],
                     item=item,
-                    user='Edson',
+                    user=session['full_name'],
                     color=access_level[int(session['permission_level'])]['color'])
         return make_response(
             render_template(
@@ -246,7 +246,7 @@ def item():
                 page_title='Item não encontrado',
                 header_title=access_level[int(session['permission_level'])]['title'],
                 item={ 'Erro': 'Item não encontrado' },
-                user='Edson',
+                user=session['full_name'],
                 color=access_level[int(session['permission_level'])]['color']), 404)
     else:
         return redirect(url_for('login'))
